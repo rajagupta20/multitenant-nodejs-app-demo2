@@ -1,0 +1,109 @@
+ID: myappsaas
+_schema-version: "3.1"
+version: 0.0.1
+
+modules:
+  - name: myappsaas-db
+    type: com.sap.xs.hdi-dynamic
+    path: db
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    properties:
+      hdi_dynamic_deploy_user: ${generated-user}
+      hdi_dynamic_deploy_password: ${generated-password}
+    provides:
+      - name: db_api
+        properties:
+          url: ${default-url}
+          user: ${generated-user}
+          password: ${generated-password}
+
+  - name: myappsaas-srv
+    type: nodejs
+    path: srv
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    provides:
+      - name: srv_api
+        properties:
+          url: ${default-url}
+    properties:
+      SAP_JWT_TRUST_ACL:
+        - clientid: "*"
+          identityzone: "sap-provisioning"
+    requires:
+      - name: myappsaas-uaa
+      - name: myappsaas-registry
+      - name: myappsaas-sm
+      - name: db_api
+        properties:
+          db_api_url: ~{url}
+          db_api_user: ~{user}
+          db_api_password: ~{password}
+      - name: myappsaas-dest
+
+  - name: myappsaas
+    type: html5
+    path: app
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    provides:
+      - name: app_api
+        properties:
+          url: ${default-url}
+          application: ${app-name}
+    properties:
+      TENANT_HOST_PATTERN: '^(.*)-${space}-${app-name}.${default-domain}'
+    requires:
+      - name: myappsaas-uaa
+      - name: srv_api
+        group: destinations
+        properties:
+          name: srv
+          url: ~{url}
+          forwardAuthToken: true
+
+resources:
+  - name: myappsaas-uaa
+    type: org.cloudfoundry.managed-service
+    requires: 
+      - name: app_api
+    properties:
+      XSAPPNAME: ${xsuaa-app}
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+      xsuaa-app: ${space}-~{app_api/application}
+      config:
+        xsappname: ${xsuaa-app}
+  - name: myappsaas-sm
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: service-manager
+      service-plan: container
+  - name: myappsaas-registry
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: myappsaas-uaa
+    parameters:
+      service: saas-registry
+      service-plan: application
+      service-name: myappsaas-registry
+      config:
+        xsappname: ~{myappsaas-uaa/XSAPPNAME}
+        appName: myappsaas
+        displayName: 'My SaaS App'
+        description: 'My SaaS Business Application'
+        category: 'Digital Partner Engineering'
+        appUrls:
+          onSubscription: https://${org}-${space}-myappsaas-srv.${default-domain}/callback/v1.0/tenants/{tenantId}
+          getDependencies: https://${org}-${space}-myappsaas-srv.${default-domain}/callback/v1.0/dependencies
+  - name: myappsaas-dest
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite

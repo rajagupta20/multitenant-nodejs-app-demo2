@@ -1,0 +1,54 @@
+{
+    "xsappname": "myappsaas",
+    "tenant-mode": "shared",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.Callback",
+            "description": "With this scope set, the callbacks for tenant onboarding, offboarding and getDependencies can be called.",
+            "grant-as-authority-to-apps": [
+                "$XSAPPNAME(application,sap-provisioning,tenant-onboarding)"
+            ]
+        },
+        {
+            "name": "$XSAPPNAME.Administrator",
+            "description": "Administrate the application"
+        },
+        {
+            "name": "$XSAPPNAME.User",
+            "description": "Use the application"
+        }
+    ],
+    "role-templates": [
+        {
+            "name": "Administrator",
+            "description": "Administrator",
+            "scope-references": [
+                "$XSAPPNAME.Administrator"
+            ]
+        },
+        {
+            "name": "User",
+            "description": "User",
+            "scope-references": [
+                "$XSAPPNAME.User"
+            ]
+        }
+    ],
+    "role-collections": [
+        {
+            "name": "myappsaas_Administrator",
+            "description": "My SaaS App Administrator",
+            "role-template-references": [
+                "$XSAPPNAME.Administrator",
+                "$XSAPPNAME.User"
+            ]
+        },
+        {
+            "name": "myappsaas_User",
+            "description": "My SaaS App User",
+            "role-template-references": [
+                "$XSAPPNAME.User"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+        "express": "latest",
+        "cfenv": "latest",
+        "body-parser": "latest",
+        "axios": "latest",
+        "qs": "latest",
+        "@sap/xsenv": "latest",
+        "@sap/hdbext": "latest",
+        "@sap/xssec": "^2",
+        "passport": "latest"
+    },
+    "scripts": {
+        "start": "node server.js"
+    }
+}

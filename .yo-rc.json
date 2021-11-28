@@ -1,0 +1,14 @@
+{
+  "generator-saphanaacademy-saas": {
+    "projectName": "myappsaas",
+    "newDir": true,
+    "displayName": "My SaaS App",
+    "description": "My SaaS Business Application",
+    "category": "Digital Partner Engineering",
+    "SaaSAPI": true,
+    "HANA": true,
+    "customDomain": "",
+    "routes": true,
+    "destination": true
+  }
+}
